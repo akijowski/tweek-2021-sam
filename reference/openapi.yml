@@ -1,0 +1,160 @@
+openapi: 3.0.1
+info:
+  title: Notes Application
+  version: '1'
+  contact:
+    name: Adam Kijowski
+    email: akijowski@twilio.com
+  description: A tweek week 2021 project
+externalDocs:
+  description: Project repo
+  url: 'https://github.com/akijowski/tweek-2021-sam'
+tags:
+  - name: notes
+    description: note operations
+paths:
+  /notes:
+    post:
+      tags:
+        - notes
+      operationId: post-notes
+      summary: Create a new Note
+      description: This endpoint will take the request body and persist it in the database
+      requestBody:
+        $ref: '#/components/requestBodies/NoteCreationRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/NoteCreationResponse'
+      x-amazon-apigateway-integration:
+        # AWS SAM currently only supports the AWS_Proxy integration
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotesWriterFunction.Arn}:${FunctionAliasParam}/invocations
+        passthroughBehavior: when_no_templates
+    get:
+      tags:
+        - notes
+      operationId: get-notes
+      summary: Get all Notes
+      description: This endpoint will return all Notes in the database
+      responses:
+        '200':
+          $ref: '#/components/responses/MultipleNoteResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotesReaderFunction.Arn}:${FunctionAliasParam}/invocations
+        passthroughBehavior: when_no_templates
+  /notes/{owner}:
+    parameters:
+      - $ref: '#/components/parameters/OwnerIDPathParameter'
+    get:
+      tags:
+        - notes
+      operationId: get-notes-owner
+      summary: Get all Notes for Owner
+      description: This endpoint will return all Notes in the database for the Owner
+      responses:
+        '200':
+          $ref: '#/components/responses/MultipleNoteResponse'
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotesReaderFunction.Arn}:${FunctionAliasParam}/invocations
+        passthroughBehavior: when_no_templates
+
+components:
+  parameters:
+    OwnerIDPathParameter:
+      name: owner
+      in: path
+      required: true
+      schema:
+        type: string
+
+  requestBodies:
+    NoteCreationRequest:
+      description: A valid Note creation request
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NoteRequest'
+
+  responses:
+    MultipleNoteResponse:
+      description: A valid response when retrieving multiple Notes
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MultipleNoteResponse'
+
+  schemas:
+    MultipleNoteResponse:
+      description: A response containing multiple Notes
+      type: object
+      properties:
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/NoteResponse'
+      required:
+        - notes
+    NoteRequest:
+      description: A Note request
+      type: object
+      properties:
+        owner:
+          type: string
+          minLength: 1
+          description: the note owner's name
+        title:
+          type: string
+          minLength: 1
+          description: the note title
+        message:
+          type: string
+          minLength: 1
+          description: the note message
+      required:
+        - owner
+        - title
+        - message
+      x-examples:
+        valid-request:
+          owner: adam
+          title: tweek week
+          message: this is a message.
+    NoteResponse:
+      description: A Note response
+      type: object
+      properties:
+        owner:
+          type: string
+          minLength: 1
+          description: the note owner's name
+        title:
+          type: string
+          minLength: 1
+          description: the note title
+        message:
+          type: string
+          minLength: 1
+          description: the note message
+        timestamp:
+          type: number
+          description: the recorded time in epoch millis
+      required:
+        - owner
+        - title
+        - message
+        - timestamp
+      x-examples:
+        valid-response:
+          owner: adam
+          title: tweek week
+          message: this is a sample message.  A really good one.
+          timestamp: 1638999997

@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "akijowski-tweek-week"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-yqujl6m5m6f6"
+s3_prefix = "akijowski-tweek-week"
+region = "us-east-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+parameter_overrides = "ProjectNameRootParam=\"akijowski-tweek\" EnvParam=\"dev\" FunctionAliasParam=\"LIVE\" NotesTableNameParam=\"akijowski_tweek_week_notes\""

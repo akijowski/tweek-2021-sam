@@ -1,0 +1,219 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  🚀 Tweek Week 2021 Project
+
+  Utilizing AWS SAM to help facilitate the development of Serverless applications
+
+Globals:
+  Api:
+    OpenApiVersion: 3.0.1
+  Function:
+    Timeout: 5
+    Runtime: go1.x
+    Architectures:
+      - x86_64
+    AutoPublishAlias: !Ref FunctionAliasParam
+    Tracing: PassThrough
+    DeploymentPreference:
+       Type: Linear10PercentEvery1Minute
+    Tags:
+      TWEEK_WEEK_2021: 'true'
+
+Parameters:
+  ProjectNameRootParam:
+    Type: String
+    Default: akijowski-tweek
+    Description: The root name to be used for identifying resources
+  EnvParam:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - stage
+    Description: The env for the project
+  FunctionAliasParam:
+    Type: String
+    Default: LIVE
+    Description: The alias name to use for lambda functions
+  NotesTableNameParam:
+    Type: String
+    Default: akijowski_tweek_week_notes
+    Description: The name for the notes table
+
+Resources:
+  NotesApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub '${ProjectNameRootParam}-${EnvParam}'
+      Description: The REST API for the Notes functions
+      Mode: merge
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: reference/openapi.yml
+      StageName: !Ref EnvParam
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiAccessLogsGroup.Arn
+        Format: '{"caller":"$context.identity.caller","httpMethod":"$context.httpMethod","ip":"$context.identity.sourceIp","protocol":"$context.protocol","requestId":"$context.requestId","requestTime":"$context.requestTime","resourcePath":"$context.resourcePath","responseLength":"$context.responseLength","status":"$context.status","user":"$context.identity.user"}'
+      Tags:
+        TWEEK_WEEK_2021: 'true'
+  ApiAccessLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/apigw/${ProjectNameRootParam}-access-${EnvParam}'
+      RetentionInDays: 5
+
+  NotesWriterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: notes_writer/
+      Handler: notes_writer
+      FunctionName: !Sub '${ProjectNameRootParam}-notes-writer-${EnvParam}'
+      Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/notes_akijowski-role'
+      DeploymentPreference:
+        Alarms:
+          - !Ref NotesWriterAliasAlarm
+          - !Ref NotesWriterLatestVersionAlarm
+      Environment:
+        Variables:
+          WRITER_TABLE_NAME: !Ref NotesTableNameParam
+          DYNAMODB_API_URL_OVERRIDE: ''
+  ApiNotesWriterPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Sub '${NotesWriterFunction}:${FunctionAliasParam}'
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NotesApi}/${EnvParam}/*'
+  NotesWriterAliasAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Lambda Function Error > 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: Resource
+          Value: !Sub "${NotesWriterFunction}:${FunctionAliasParam}"
+        - Name: FunctionName
+          Value: !Ref NotesWriterFunction
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+  NotesWriterLatestVersionAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Lambda Function Error > 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: Resource
+          Value: !Sub "${NotesWriterFunction}:${FunctionAliasParam}"
+        - Name: FunctionName
+          Value: !Ref NotesWriterFunction
+        - Name: ExecutedVersion
+          Value: !GetAtt NotesWriterFunction.Version.Version
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+
+  NotesReaderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: notes_reader/
+      Handler: notes_reader
+      FunctionName: !Sub '${ProjectNameRootParam}-notes-reader-${EnvParam}'
+      Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/notes_akijowski-role'
+      DeploymentPreference:
+        Hooks:
+          PreTraffic: !Ref PreTrafficFunction
+        Alarms:
+          - !Ref NotesReaderAliasAlarm
+          - !Ref NotesReaderLatestVersionAlarm
+      Environment:
+        Variables:
+          READER_TABLE_NAME: !Ref NotesTableNameParam
+          DYNAMODB_API_URL_OVERRIDE: ''
+  ApiNotesReaderPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Sub '${NotesReaderFunction}:${FunctionAliasParam}'
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NotesApi}/${EnvParam}/*'
+  NotesReaderAliasAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Lambda Function Error > 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: Resource
+          Value: !Sub "${NotesReaderFunction}:${FunctionAliasParam}"
+        - Name: FunctionName
+          Value: !Ref NotesReaderFunction
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+  NotesReaderLatestVersionAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Lambda Function Error > 0
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: Resource
+          Value: !Sub "${NotesReaderFunction}:${FunctionAliasParam}"
+        - Name: FunctionName
+          Value: !Ref NotesReaderFunction
+        - Name: ExecutedVersion
+          Value: !GetAtt NotesReaderFunction.Version.Version
+      EvaluationPeriods: 2
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 0
+
+  PreTrafficFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: deploy_hook/
+      Handler: deploy_hook
+      FunctionName: !Sub 'CodeDeployHook_${ProjectNameRootParam}-pre-${EnvParam}'
+      Timeout: 30
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Action:
+                - "codedeploy:PutLifecycleEventHookExecutionStatus"
+              Resource:
+                !Sub 'arn:${AWS::Partition}:codedeploy:${AWS::Region}:${AWS::AccountId}:deploymentgroup:${ServerlessDeploymentApplication}/*'
+#        - Version: "2012-10-17"
+#          Statement:
+#            - Effect: "Allow"
+#              Action:
+#                - "lambda:InvokeFunction"
+#              Resource: !GetAtt MyLambdaFunction.Arn
+      DeploymentPreference:
+        Enabled: False
+        Role: ""
+      AutoPublishAlias: null
+      Environment:
+        Variables:
+          CurrentVersion: !Ref NotesReaderFunction.Version
+
+Outputs:
+  NotesWriterFunction:
+    Description: "Notes Writer Function ARN"
+    Value: !GetAtt NotesWriterFunction.Arn
+  NotesReaderFunction:
+    Description: "Notes Reader Function ARN"
+    Value: !GetAtt NotesReaderFunction.Arn

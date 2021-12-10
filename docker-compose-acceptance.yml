@@ -1,0 +1,32 @@
+version: '3.6'
+
+services:
+  localstack:
+    image: 'localstack/localstack:0.13.0.10'
+    container_name: localstack
+    environment:
+      SERVICES: 'dynamodb'
+    ports:
+      - "4566:4566"
+    networks:
+      - api
+
+  aws_sam:
+    build:
+      dockerfile: Dockerfile
+    image: aws_sam_local
+    container_name: aws-sam
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    working_dir: $PWD
+    command:
+      - "$PWD"
+    ports:
+      - "3001:3001"
+    volumes:
+      - $PWD:$PWD
+      - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  api:
+    name: aws-sam-api

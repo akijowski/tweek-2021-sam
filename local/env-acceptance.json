@@ -1,0 +1,10 @@
+{
+  "NotesWriterFunction": {
+    "DYNAMODB_API_URL_OVERRIDE": "http://localstack:4566",
+    "WRITER_TABLE_NAME": "notes"
+  },
+  "NotesReaderFunction": {
+    "DYNAMODB_API_URL_OVERRIDE": "http://localstack:4566",
+    "READER_TABLE_NAME": "notes"
+  }
+}
