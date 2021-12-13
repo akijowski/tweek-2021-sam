@@ -48,6 +48,7 @@ Resources:
       Name: !Sub '${ProjectNameRootParam}-${EnvParam}'
       Description: The REST API for the Notes functions
       Mode: merge
+      # AWS SAM will parse this OpenAPI spec for us and configure the local API Gateway to match
       DefinitionBody:
         Fn::Transform:
           Name: AWS::Include
