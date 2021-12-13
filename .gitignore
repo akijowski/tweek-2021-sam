@@ -1,6 +1,6 @@
 
-# Created by https://www.toptal.com/developers/gitignore/api/macos,go,goland,sam
-# Edit at https://www.toptal.com/developers/gitignore?templates=macos,go,goland,sam
+# Created by https://www.toptal.com/developers/gitignore/api/macos,linux,goland,terraform,sam,go
+# Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,goland,terraform,sam,go
 
 ### Go ###
 # Binaries for programs and plugins
@@ -102,6 +102,21 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
+### Linux ###
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
 ### macOS ###
 # General
 .DS_Store
@@ -138,7 +153,39 @@ Temporary Items
 
 **/.aws-sam
 
-**/.terraform
-**/.terraform.lock.hcl
+### Terraform ###
+# Local .terraform directories
+**/.terraform/*
 
-# End of https://www.toptal.com/developers/gitignore/api/macos,go,goland,sam
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+
+# Exclude all .tfvars files, which are likely to contain sentitive data, such as
+# password, private keys, and other secrets. These should not be part of version
+# control as they are data points which are potentially sensitive and subject
+# to change depending on the environment.
+#
+*.tfvars
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not checked in
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files you do wish to add to version control using negated pattern
+# !example_override.tf
+
+# Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
+# example: *tfplan*
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# End of https://www.toptal.com/developers/gitignore/api/macos,linux,goland,terraform,sam,go
