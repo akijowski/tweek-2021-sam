@@ -10,6 +10,12 @@ variable "enable_dynamo_access" {
   default = false
 }
 
+variable "enable_xray_write_access" {
+  type = bool
+  description = "Setting this to true will add IAM permissions to write XRay traces to the XRay daemon process by adding the AWSXRayDaemonWriteAccess managed IAM role"
+  default = false
+}
+
 variable "dynamo_table_name" {
   type = string
   description = "Required if var.enable_dynamo_access is true.  This is the dynamodb table needed for access"

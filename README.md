@@ -198,7 +198,7 @@ Additional information around safe deployment best practices can be found in thi
 There are still a few outstanding items or other SAM features that I did not get to during the week:
 
 - [ ] Somehow I borked the docker-compose file for local development.  I need to see what happened and fix that.
-- [ ] The lambdas do not include any tracing using AWS X-Ray but that is straight forward to implement using AWS SAM.
+- [x] The lambdas do not include any tracing using AWS X-Ray but that is straight forward to implement using AWS SAM.
 - [ ] The integration and acceptance tests are not exhaustive and can be enhanced to cover my edge cases.
 - [ ] I felt that incorporating a CICD pipeline for this project was out of scope for the week, but could be a great
 next step.

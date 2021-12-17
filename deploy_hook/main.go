@@ -20,17 +20,11 @@ type DeploymentHook struct {
 	LifecycleEventHookExecutionID string `json:"LifecycleEventHookExecutionId"`
 }
 
-func handler(ctx context.Context, event map[string]interface{}) error {
+func handler(ctx context.Context, event DeploymentHook) error {
 	log.Printf("event: %+v", event)
 
-	var deploymentID string
-	var executionId string
-	if d, ok := event["DeploymentId"]; ok {
-		deploymentID = d.(string)
-	}
-	if l, ok := event["LifecycleEventHookExecutionId"]; ok {
-		executionId = l.(string)
-	}
+	deploymentID := event.DeploymentID
+	executionId := event.LifecycleEventHookExecutionID
 	log.Printf("found DeploymentId=%q and ExecutionId=%q", deploymentID, executionId)
 	log.Print("automatically succeeding")
 

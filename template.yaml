@@ -8,13 +8,14 @@ Description: >
 Globals:
   Api:
     OpenApiVersion: 3.0.1
+    TracingEnabled: True
   Function:
     Timeout: 5
     Runtime: go1.x
     Architectures:
       - x86_64
     AutoPublishAlias: !Ref FunctionAliasParam
-    Tracing: PassThrough
+    Tracing: Active
     DeploymentPreference:
        Type: Linear10PercentEvery1Minute
     Tags:
@@ -206,6 +207,7 @@ Resources:
       DeploymentPreference:
         Enabled: False
         Role: ""
+      Tracing: PassThrough # do not need traces here
       AutoPublishAlias: null
       Environment:
         Variables:

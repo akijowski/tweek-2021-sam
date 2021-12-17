@@ -16,6 +16,12 @@ resource "aws_iam_role_policy_attachment" "dynamo_access" {
   role       = aws_iam_role.this.id
 }
 
+resource "aws_iam_role_policy_attachment" "xray_write_access" {
+  count      = var.enable_xray_write_access ? 1 : 0
+  role       = aws_iam_role.this.id
+  policy_arn = data.aws_iam_policy.xray_write_access.arn
+}
+
 resource "aws_iam_policy" "dynamo_access" {
   count       = var.enable_dynamo_access ? 1 : 0
   name        = "dynamodb-access"
@@ -59,4 +65,8 @@ data "aws_iam_policy_document" "dynamo_access" {
 # https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html#permissions-executionrole-features
 data "aws_iam_policy" "basic_execution" {
   name = "AWSLambdaBasicExecutionRole"
+}
+
+data "aws_iam_policy" "xray_write_access" {
+  name = "AWSXRayDaemonWriteAccess"
 }

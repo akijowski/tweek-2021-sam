@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-xray-sdk-go/instrumentation/awsv2"
 	"log"
 	"net/http"
 	"os"
@@ -21,7 +22,6 @@ var api *dynamodb.Client
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	lc, _ := lambdacontext.FromContext(ctx)
-	log.Printf("CONTEXT: %+v", lc)
 	notes, err := handleRequest(ctx, request)
 	if err != nil {
 		var derr *ddb.DynamoDBError
@@ -46,7 +46,6 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 }
 
 func main() {
-	log.Printf("OSENV: %s", os.Environ())
 	lambda.Start(handler)
 }
 
@@ -89,6 +88,8 @@ func initDynamoClient() *dynamodb.Client {
 	if err != nil {
 		panic(err)
 	}
+	// Instrumenting AWS SDK v2
+	awsv2.AWSV2Instrumentor(&cfg.APIOptions)
 	return dynamodb.NewFromConfig(cfg)
 }
 

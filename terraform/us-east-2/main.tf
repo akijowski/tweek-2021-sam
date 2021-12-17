@@ -32,9 +32,10 @@ module "dynamodb" {
 }
 
 module "iam_role" {
-  source                 = "../modules/iam"
-  dynamo_table_name      = var.dynamo_table_name
-  lambda_name            = var.lambda_name
-  enable_basic_execution = true
-  enable_dynamo_access   = true
+  source                   = "../modules/iam"
+  dynamo_table_name        = var.dynamo_table_name
+  lambda_name              = var.lambda_name
+  enable_basic_execution   = true
+  enable_dynamo_access     = true
+  enable_xray_write_access = true
 }
