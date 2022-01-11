@@ -120,6 +120,9 @@ a requirement for Terraform and can be restructured as needed.
 
 There is a file `terraform.tfvars` that acts as the configurable input when running the Terraform in `us-east-2`.
 
+The state is stored in a remote backend using S3.  You'll need to provision a bucket and DynamoDB table in order to use
+the remote state.
+
 You can run Terraform from the `terraform/us-east-2` directory with a command:
 
 ```bash
