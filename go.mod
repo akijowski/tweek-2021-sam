@@ -15,6 +15,11 @@ require (
 	github.com/testcontainers/testcontainers-go v0.12.0
 )
 
+replace (
+	github.com/opencontainers/image-spec v1.0.1 => github.com/opencontainers/image-spec v1.0.2 // indirect
+	github.com/opencontainers/runc v1.0.2 => github.com/opencontainers/runc v1.1.0 // indirect
+)
+
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.4.17-0.20210211115548-6eac466e5fa3 // indirect
@@ -60,7 +65,7 @@ require (
 	github.com/valyala/fasthttp v1.24.0 // indirect
 	go.opencensus.io v0.22.3 // indirect
 	golang.org/x/net v0.0.0-20211108170745-6635138e15ea // indirect
-	golang.org/x/sys v0.0.0-20211109184856-51b60fd695b3 // indirect
+	golang.org/x/sys v0.0.0-20211116061358-0a5406a5449c // indirect
 	golang.org/x/text v0.3.6 // indirect
 	google.golang.org/genproto v0.0.0-20210114201628-6edceaf6022f // indirect
 	google.golang.org/grpc v1.35.0 // indirect
