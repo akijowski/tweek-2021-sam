@@ -16,6 +16,7 @@ require (
 )
 
 replace (
+	github.com/docker/distribution v2.7.1+incompatible => github.com/docker/distribution v2.8.0+incompatible
 	github.com/opencontainers/image-spec v1.0.1 => github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opencontainers/runc v1.0.2 => github.com/opencontainers/runc v1.1.0 // indirect
 )
